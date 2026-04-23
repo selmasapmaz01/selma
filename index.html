@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Selma'nın Defteri">
@@ -1144,6 +1147,9 @@
 
     <script>
         const LOCAL_BACKUP_KEY = 'selma-debts-backup-v2';
+        const PAGE_REFRESH_KEY = 'selma-page-last-refresh';
+        const PAGE_REFRESH_PARAM = '_refresh';
+        const PAGE_REFRESH_TTL = 2 * 60 * 1000;
 
         // ========== FIREBASE CONFIG ==========
         const firebaseConfig = {
@@ -1167,8 +1173,31 @@
         let pendingDebtId = null;
         let isConnected = false;
 
+        function ensureFreshPageLoad() {
+            const now = Date.now();
+            const url = new URL(window.location.href);
+            const hasRefreshParam = url.searchParams.has(PAGE_REFRESH_PARAM);
+            const lastRefreshAt = Number(localStorage.getItem(PAGE_REFRESH_KEY) || 0);
+
+            if (!hasRefreshParam && now - lastRefreshAt > PAGE_REFRESH_TTL) {
+                url.searchParams.set(PAGE_REFRESH_PARAM, String(now));
+                localStorage.setItem(PAGE_REFRESH_KEY, String(now));
+                window.location.replace(url.toString());
+                return false;
+            }
+
+            if (hasRefreshParam) {
+                localStorage.setItem(PAGE_REFRESH_KEY, url.searchParams.get(PAGE_REFRESH_PARAM) || String(now));
+                url.searchParams.delete(PAGE_REFRESH_PARAM);
+                window.history.replaceState({}, '', url.toString());
+            }
+
+            return true;
+        }
+
         // ========== INIT ==========
         function init() {
+            if (!ensureFreshPageLoad()) return;
             setDefaultDate();
             createFloatingHearts();
             setupEventListeners();
@@ -1305,12 +1334,18 @@
 
         function confirmDelete() {
             if (!pendingDebtId) return;
-            debtsRef.child(pendingDebtId).remove()
+            const debtId = pendingDebtId;
+            debtsRef.child(debtId).remove()
                 .then(() => {
-                    closeModal('deleteModal');
                     showToast('🗑️ Borç silindi!');
+                })
+                .catch((error) => {
+                    showToast(`❌ Silinemedi: ${error.message}`);
+                })
+                .finally(() => {
+                    closeModal('deleteModal');
+                    pendingDebtId = null;
                 });
-            pendingDebtId = null;
         }
 
         function cancelDelete() {
@@ -1330,8 +1365,13 @@
 
             debtsRef.remove()
                 .then(() => {
-                    closeModal('clearAllModal');
                     showToast('🗑️ Tüm borçlar silindi!');
+                })
+                .catch((error) => {
+                    showToast(`❌ Tümü silinemedi: ${error.message}`);
+                })
+                .finally(() => {
+                    closeModal('clearAllModal');
                 });
         }
 
