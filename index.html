@@ -1237,7 +1237,7 @@
                     });
                     allDebts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                 }
-                debts = allDebts;
+                debts = getActiveDebts(allDebts);
                 persistLocalBackup();
                 renderAll();
                 renderBackupStatus();
@@ -1263,6 +1263,8 @@
                 description,
                 paymentMethod: paymentMethod || 'Belirtilmedi',
                 date,
+                archived: false,
+                archivedAt: null,
                 paid: false,
                 paidDate: null,
                 createdAt: Date.now()
@@ -1335,12 +1337,24 @@
         function confirmDelete() {
             if (!pendingDebtId) return;
             const debtId = pendingDebtId;
+            const debt = debts.find(item => item.id === debtId);
             debtsRef.child(debtId).remove()
                 .then(() => {
                     showToast('🗑️ Borç silindi!');
                 })
                 .catch((error) => {
-                    showToast(`❌ Silinemedi: ${error.message}`);
+                    if (!debt || !isPermissionDeniedError(error)) {
+                        showToast(`❌ Silinemedi: ${error.message}`);
+                        return;
+                    }
+
+                    archiveDebt(debt)
+                        .then(() => {
+                            showToast('🗃️ Silme izni kapalıydı, kayıt arşive alındı.');
+                        })
+                        .catch((archiveError) => {
+                            showToast(`❌ Silinemedi: ${archiveError.message}`);
+                        });
                 })
                 .finally(() => {
                     closeModal('deleteModal');
@@ -1368,7 +1382,18 @@
                     showToast('🗑️ Tüm borçlar silindi!');
                 })
                 .catch((error) => {
-                    showToast(`❌ Tümü silinemedi: ${error.message}`);
+                    if (!isPermissionDeniedError(error)) {
+                        showToast(`❌ Tümü silinemedi: ${error.message}`);
+                        return;
+                    }
+
+                    archiveAllDebts(debts)
+                        .then((count) => {
+                            showToast(`🗃️ Silme izni kapalıydı, ${count} kayıt arşive alındı.`);
+                        })
+                        .catch((archiveError) => {
+                            showToast(`❌ Tümü silinemedi: ${archiveError.message}`);
+                        });
                 })
                 .finally(() => {
                     closeModal('clearAllModal');
@@ -1494,12 +1519,45 @@
             return div.innerHTML;
         }
 
+        function getActiveDebts(records) {
+            return records.filter(record => !record.archived);
+        }
+
+        function isPermissionDeniedError(error) {
+            const message = String(error?.message || '');
+            const code = String(error?.code || '');
+            return code.includes('PERMISSION_DENIED')
+                || message.includes('PERMISSION_DENIED')
+                || message.includes('Permission denied');
+        }
+
+        function archiveDebt(debt) {
+            return debtsRef.child(debt.id).update({
+                archived: true,
+                archivedAt: Date.now()
+            });
+        }
+
+        function archiveAllDebts(records) {
+            const updates = {};
+            const archivedAt = Date.now();
+
+            records.forEach((record) => {
+                updates[`${record.id}/archived`] = true;
+                updates[`${record.id}/archivedAt`] = archivedAt;
+            });
+
+            return debtsRef.update(updates).then(() => records.length);
+        }
+
         function normalizeDebtRecord(record) {
             return {
                 person: typeof record?.person === 'string' ? record.person : 'Belirtilmedi',
                 description: typeof record?.description === 'string' ? record.description : '',
                 paymentMethod: typeof record?.paymentMethod === 'string' && record.paymentMethod.trim() ? record.paymentMethod : 'Belirtilmedi',
                 date: typeof record?.date === 'string' ? record.date : new Date().toISOString().split('T')[0],
+                archived: Boolean(record?.archived),
+                archivedAt: Number.isFinite(record?.archivedAt) ? record.archivedAt : null,
                 paid: Boolean(record?.paid),
                 paidDate: typeof record?.paidDate === 'string' ? record.paidDate : null,
                 createdAt: Number.isFinite(record?.createdAt) ? record.createdAt : Date.now()
@@ -1517,7 +1575,7 @@
                 exportedAt: new Date().toISOString(),
                 totalCount: allDebts.length,
                 activeCount: debts.length,
-                archivedCount: 0,
+                archivedCount: allDebts.filter(debt => debt.archived).length,
                 debts: debtMap
             };
         }
@@ -1543,6 +1601,7 @@
         function renderBackupStatus() {
             const status = document.getElementById('backupStatus');
             const localBackup = getLocalBackup();
+            const archivedCount = allDebts.filter(debt => debt.archived).length;
 
             if (allDebts.length === 0 && localBackup?.totalCount) {
                 status.textContent = `Bu cihazda ${localBackup.totalCount} kayıtlık bir otomatik kopya saklanıyor.`;
@@ -1550,7 +1609,14 @@
             }
 
             if (debts.length > 0) {
-                status.textContent = `${debts.length} aktif kayıt var. Son görünüm bu cihazda otomatik korunuyor.`;
+                status.textContent = archivedCount
+                    ? `${debts.length} aktif kayıt var, ${archivedCount} kayıt arşivde. Son görünüm bu cihazda otomatik korunuyor.`
+                    : `${debts.length} aktif kayıt var. Son görünüm bu cihazda otomatik korunuyor.`;
+                return;
+            }
+
+            if (archivedCount > 0) {
+                status.textContent = `${archivedCount} kayıt arşivde. Son görünüm bu cihazda otomatik korunuyor.`;
                 return;
             }
 
