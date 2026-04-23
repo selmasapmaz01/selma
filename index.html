@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Selma'nın Defteri">
+    <meta name="theme-color" content="#e84393">
+    <title>Selma'nın Hesap Defteri 💕</title>
+    <meta name="description" content="Selma'nın eğlenceli borç takip defteri. Sevgilinle aranızdaki borçları takip et!">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ========== RESET & BASE ========== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 30%, #fdfbfb 50%, #d4a5ff 75%, #ff9a9e 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #4a2040;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ========== FLOATING HEARTS BACKGROUND ========== */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .floating-hearts span {
+            position: absolute;
+            display: block;
+            font-size: 24px;
+            animation: floatUp linear infinite;
+            opacity: 0.15;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(0deg) scale(1);
+                opacity: 0;
+            }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% {
+                transform: translateY(-10vh) rotate(720deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* ========== CONTAINER ========== */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+
+        /* ========== CONNECTION STATUS ========== */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 12px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #8b5e83;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ffa502;
+            animation: pulse 1.5s ease infinite;
+        }
+
+        .connection-dot.connected {
+            background: #00b894;
+            animation: none;
+        }
+
+        .connection-dot.offline {
+            background: #e84393;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 30px 20px;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(180, 80, 150, 0.15);
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #e84393, #a855f7, #e84393);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s linear infinite;
+            margin-bottom: 6px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: #8b5e83;
+            font-weight: 600;
+        }
+
+        /* ========== SUMMARY CARDS ========== */
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 18px;
+            padding: 18px 14px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(180, 80, 150, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(180, 80, 150, 0.2);
+        }
+
+        .summary-card .emoji {
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+        }
+
+        .summary-card .label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #9b6b92;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .summary-card .amount {
+            font-size: 1.4rem;
+            font-weight: 900;
+        }
+
+        .summary-card.total .amount { color: #e84393; }
+        .summary-card.paid .amount { color: #00b894; }
+        .summary-card.remaining .amount { color: #a855f7; }
+
+        .fun-message {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #8b5e83;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .actions-panel {
+            margin-bottom: 24px;
+            padding: 16px 18px;
+            background: rgba(255, 255, 255, 0.38);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            box-shadow: 0 6px 24px rgba(180, 80, 150, 0.1);
+        }
+
+        .actions-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .actions-copy strong {
+            display: block;
+            font-size: 0.95rem;
+            color: #7f466c;
+        }
+
+        .actions-copy span {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #a06d92;
+        }
+
+        .actions-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            padding: 10px 14px;
+            border: 2px solid rgba(232, 67, 147, 0.15);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.65);
+            color: #e84393;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            border-color: rgba(232, 67, 147, 0.35);
+            box-shadow: 0 6px 18px rgba(232, 67, 147, 0.15);
+        }
+
+        .backup-note {
+            margin-top: 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #8b5e83;
+            line-height: 1.5;
+        }
+
+        .hidden-input {
+            display: none;
+        }
+
+        /* ========== ADD FORM ========== */
+        .add-section {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px 20px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(180, 80, 150, 0.12);
+        }
+
+        .add-section h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #e84393;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #9b6b92;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 14px;
+            border: 2px solid rgba(232, 67, 147, 0.15);
+            border-radius: 12px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 16px; /* Prevents iOS zoom on focus */
+            font-weight: 600;
+            color: #4a2040;
+            background: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e84393' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #e84393;
+            box-shadow: 0 0 0 3px rgba(232, 67, 147, 0.15);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input::placeholder {
+            color: #c5a0bd;
+        }
+
+        .btn-add {
+            grid-column: 1 / -1;
+            padding: 14px;
+            background: linear-gradient(135deg, #e84393, #a855f7);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(232, 67, 147, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(232, 67, 147, 0.45);
+        }
+
+        .btn-add:active {
+            transform: translateY(0);
+        }
+
+        /* ========== DEBT LIST ========== */
+        .debt-list-section {
+            margin-bottom: 24px;
+        }
+
+        .debt-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .debt-list-header h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #e84393;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-clear-all {
+            padding: 8px 16px;
+            background: rgba(255, 107, 129, 0.15);
+            color: #e84393;
+            border: 2px solid rgba(232, 67, 147, 0.2);
+            border-radius: 10px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-clear-all:hover {
+            background: rgba(255, 107, 129, 0.3);
+            border-color: #e84393;
+        }
+
+        .debt-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 18px;
+            border: 2px dashed rgba(232, 67, 147, 0.2);
+        }
+
+        .empty-state .emoji {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-weight: 700;
+            color: #b88aae;
+            font-size: 1rem;
+        }
+
+        .empty-state .sub {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* ========== DEBT CARD ========== */
+        .debt-card {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 18px;
+            padding: 16px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(180, 80, 150, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.4s ease;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .debt-card:hover {
+            box-shadow: 0 6px 28px rgba(180, 80, 150, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .debt-card.paid {
+            background: rgba(0, 184, 148, 0.1);
+            border-color: rgba(0, 184, 148, 0.3);
+            opacity: 0.75;
+        }
+
+        .debt-card.paid .debt-info .debt-description {
+            text-decoration: line-through;
+            color: #7fb8a8;
+        }
+
+        /* Custom Checkbox */
+        .debt-checkbox {
+            position: relative;
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .debt-checkbox input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .debt-checkbox .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 28px;
+            height: 28px;
+            border: 2.5px solid rgba(232, 67, 147, 0.35);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .debt-checkbox input:hover ~ .checkmark {
+            border-color: #e84393;
+            box-shadow: 0 0 0 3px rgba(232, 67, 147, 0.1);
+        }
+
+        .debt-card.paid .debt-checkbox .checkmark {
+            background: linear-gradient(135deg, #00b894, #55efc4);
+            border-color: #00b894;
+        }
+
+        .debt-card.paid .debt-checkbox .checkmark::after {
+            content: '✓';
+            color: white;
+            font-weight: 900;
+            font-size: 16px;
+        }
+
+        /* Debt Info */
+        .debt-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .debt-info .debt-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .debt-info .debt-person {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: white;
+            background: linear-gradient(135deg, #e84393, #a855f7);
+            padding: 2px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .debt-card.paid .debt-info .debt-person {
+            background: linear-gradient(135deg, #00b894, #55efc4);
+        }
+
+        .debt-info .debt-description {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #5a3050;
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
+
+        .debt-info .debt-payment-highlight {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 8px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(232, 67, 147, 0.18), rgba(168, 85, 247, 0.18));
+            border: 1px solid rgba(232, 67, 147, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+        }
+
+        .debt-info .debt-payment-label {
+            font-size: 0.68rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #9b4c7f;
+        }
+
+        .debt-info .debt-payment-value {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.94rem;
+            font-weight: 900;
+            color: #7a275f;
+            line-height: 1.35;
+            word-break: break-word;
+        }
+
+        .debt-card.paid .debt-info .debt-payment-highlight {
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.14), rgba(85, 239, 196, 0.22));
+            border-color: rgba(0, 184, 148, 0.2);
+        }
+
+        .debt-card.paid .debt-info .debt-payment-label {
+            color: #138b73;
+        }
+
+        .debt-card.paid .debt-info .debt-payment-value {
+            color: #0f7561;
+        }
+
+        .debt-info .debt-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #a88a9f;
+        }
+
+        .debt-info .debt-meta span {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .debt-card.paid .debt-paid-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #00b894;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-top: 4px;
+        }
+
+        /* Delete Button */
+        .btn-delete {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 107, 129, 0.1);
+            color: #e84393;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-delete:hover {
+            background: rgba(255, 107, 129, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* ========== MODAL ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            background: rgba(74, 32, 64, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 32px 28px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(180, 80, 150, 0.3);
+            animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.8) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal .modal-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 12px;
+        }
+
+        .modal h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #4a2040;
+            margin-bottom: 6px;
+        }
+
+        .modal p {
+            font-size: 0.95rem;
+            color: #8b5e83;
+            font-weight: 600;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .modal p .modal-debt-detail {
+            display: block;
+            font-weight: 800;
+            color: #e84393;
+            font-size: 1.05rem;
+            margin-top: 4px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #00b894, #55efc4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+        }
+
+        .btn-cancel {
+            background: rgba(232, 67, 147, 0.1);
+            color: #e84393;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(232, 67, 147, 0.2);
+        }
+
+        /* ========== CELEBRATION ========== */
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .confetti {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: confettiFall 1.5s ease forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-20px) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #b88aae;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.6rem;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .actions-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .actions-buttons {
+                width: 100%;
+            }
+
+            .btn-secondary {
+                flex: 1;
+            }
+
+            .summary-card {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 14px;
+                text-align: left;
+            }
+
+            .summary-card .emoji {
+                font-size: 1.5rem;
+                margin-bottom: 0;
+            }
+
+            .summary-card .amount {
+                font-size: 1.2rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .debt-info .debt-top-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* ========== iOS Safari Fixes ========== */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+            .modal-overlay {
+                height: -webkit-fill-available;
+            }
+        }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(232, 67, 147, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(232, 67, 147, 0.4);
+        }
+
+        /* ========== TOAST ========== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            bottom: calc(30px + env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 14px 24px;
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(180, 80, 150, 0.2);
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #4a2040;
+            z-index: 2000;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            max-width: calc(100vw - 40px);
+            text-align: center;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ========== LOADING ========== */
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .loading-spinner::after {
+            content: '';
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(232, 67, 147, 0.2);
+            border-top-color: #e84393;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Hearts Background -->
+    <div class="floating-hearts" id="floatingHearts"></div>
+
+    <!-- Celebration Container -->
+    <div class="celebration" id="celebration"></div>
+
+    <div class="container">
+        <!-- Connection Status -->
+        <div class="connection-status" id="connectionStatus">
+            <span class="connection-dot" id="connectionDot"></span>
+            <span id="connectionText">Bağlanıyor...</span>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <h1>💕 Selma'nın Hesap Defteri 💕</h1>
+            <p>Aşk hesap bilmez ama biz biliriz! 😄</p>
+        </header>
+
+        <!-- Summary Cards -->
+        <div class="summary" id="summary">
+            <div class="summary-card total">
+                <div class="emoji">📝</div>
+                <div>
+                    <div class="label">Toplam Borç</div>
+                    <div class="amount" id="totalAmount">0</div>
+                </div>
+            </div>
+            <div class="summary-card paid">
+                <div class="emoji">✅</div>
+                <div>
+                    <div class="label">Ödenen</div>
+                    <div class="amount" id="paidAmount">0</div>
+                </div>
+            </div>
+            <div class="summary-card remaining">
+                <div class="emoji">⏳</div>
+                <div>
+                    <div class="label">Kalan</div>
+                    <div class="amount" id="remainingAmount">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fun Message -->
+        <div class="fun-message" id="funMessage">
+            Henüz borç yok. Bugün ne ısmarlıyorsun? 🤔
+        </div>
+
+        <section class="actions-panel">
+            <div class="actions-top">
+                <div class="actions-copy">
+                    <strong>Kayıt koruması açık</strong>
+                    <span>Silinen kayıtları arşivde tutup son görünümü bu cihazda otomatik koruyoruz.</span>
+                </div>
+            </div>
+            <p class="backup-note" id="backupStatus">Silinen kayıtlar kalıcı olarak arşivde tutulacak.</p>
+        </section>
+
+        <!-- Add Debt Form -->
+        <section class="add-section">
+            <h2>➕ Borç Ekle</h2>
+            <form class="form-grid" id="debtForm">
+                <div class="form-group">
+                    <label for="debtPerson">Borçlu Kim? 🤷</label>
+                    <select id="debtPerson" required>
+                        <option value="" disabled selected>Seç...</option>
+                        <option value="Selma">Selma 👸</option>
+                        <option value="Myosotis">Myosotis 🤴</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="debtPaymentMethod">Ödeme Şekli 💳</label>
+                    <input type="text" id="debtPaymentMethod" placeholder="Örn: Öpücük, Sarılma, Masaj 😘">
+                </div>
+                <div class="form-group full-width">
+                    <label for="debtDescription">Ne İçin? 📝</label>
+                    <input type="text" id="debtDescription" placeholder="Örn: Kahve ısmarlama, Sinema bileti..." required>
+                </div>
+                <div class="form-group full-width">
+                    <label for="debtDate">Tarih 📅</label>
+                    <input type="date" id="debtDate" required>
+                </div>
+                <button type="submit" class="btn-add" id="btnAdd">
+                    💕 Borç Ekle
+                </button>
+            </form>
+        </section>
+
+        <!-- Debt List -->
+        <section class="debt-list-section">
+            <div class="debt-list-header">
+                <h2>📒 Borç Listesi</h2>
+                <button class="btn-clear-all" id="btnClearAll" style="display: none;">🧳 Tümünü Arşivle</button>
+            </div>
+            <div class="debt-list" id="debtList">
+                <div class="loading-spinner" id="loadingSpinner"></div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            💕 Selma'nın Hesap Defteri — Sevgiyle kodlandı 💕
+        </footer>
+    </div>
+
+    <!-- Payment Confirmation Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal">
+            <div class="modal-emoji">🤔</div>
+            <h3>Bu borç ödendi mi?</h3>
+            <p id="modalDebtInfo">Borç detayları burada görünecek.</p>
+            <div class="modal-buttons">
+                <button class="btn-confirm" id="btnConfirmPay">Evet, ödendi! 🎉</button>
+                <button class="btn-cancel" id="btnCancelPay">Hayır, henüz değil 😅</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-emoji">🗂️</div>
+            <h3>Bu borcu arşive almak istediğine emin misin?</h3>
+            <p id="deleteModalInfo">Borç detayları burada görünecek.</p>
+            <div class="modal-buttons">
+                <button class="btn-confirm" id="btnConfirmDelete" style="background: linear-gradient(135deg, #e84393, #fd79a8);">Evet, arşive al! 🗂️</button>
+                <button class="btn-cancel" id="btnCancelDelete">Vazgeç 🙅</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear All Confirmation Modal -->
+    <div class="modal-overlay" id="clearAllModal">
+        <div class="modal">
+            <div class="modal-emoji">🧳</div>
+            <h3>Tüm aktif borçları arşive almak istediğine emin misin?</h3>
+            <p>Liste temizlenir ama kayıtlar arşivde saklanmaya devam eder.</p>
+            <div class="modal-buttons">
+                <button class="btn-confirm" id="btnConfirmClear" style="background: linear-gradient(135deg, #e84393, #fd79a8);">Evet, arşivle! 🧳</button>
+                <button class="btn-cancel" id="btnCancelClear">Vazgeç 🙅</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
+    <script>
+        const LOCAL_BACKUP_KEY = 'selma-debts-backup-v2';
+
+        // ========== FIREBASE CONFIG ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpugYUyRpULV9SSVo-eu6_Enw5JZYPOdQ",
+            authDomain: "selma-bc84e.firebaseapp.com",
+            databaseURL: "https://selma-bc84e-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "selma-bc84e",
+            storageBucket: "selma-bc84e.firebasestorage.app",
+            messagingSenderId: "86292475597",
+            appId: "1:86292475597:web:e5d770c5d9996ef8038384"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const debtsRef = db.ref('debts');
+
+        // ========== STATE ==========
+        let debts = [];
+        let allDebts = [];
+        let pendingDebtId = null;
+        let isConnected = false;
+
+        // ========== INIT ==========
+        function init() {
+            setDefaultDate();
+            createFloatingHearts();
+            setupEventListeners();
+            setupFirebaseListeners();
+        }
+
+        // ========== FIREBASE LISTENERS ==========
+        function setupFirebaseListeners() {
+            // Connection status
+            const connectedRef = db.ref('.info/connected');
+            connectedRef.on('value', (snap) => {
+                const dot = document.getElementById('connectionDot');
+                const text = document.getElementById('connectionText');
+                if (snap.val() === true) {
+                    isConnected = true;
+                    dot.className = 'connection-dot connected';
+                    text.textContent = 'Bağlandı ✨';
+                    setTimeout(() => {
+                        document.getElementById('connectionStatus').style.opacity = '0.5';
+                    }, 2000);
+                } else {
+                    isConnected = false;
+                    dot.className = 'connection-dot offline';
+                    text.textContent = 'Çevrimdışı 📴';
+                    document.getElementById('connectionStatus').style.opacity = '1';
+                }
+            });
+
+            // Listen for data changes (real-time sync!)
+            debtsRef.on('value', (snapshot) => {
+                allDebts = [];
+                const data = snapshot.val();
+                if (data) {
+                    // Convert object to array and sort by date (newest first)
+                    Object.keys(data).forEach(key => {
+                        allDebts.push({ id: key, ...normalizeDebtRecord(data[key]) });
+                    });
+                    allDebts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                }
+                debts = allDebts.filter(debt => !debt.archived);
+                persistLocalBackup();
+                renderAll();
+                renderBackupStatus();
+            });
+        }
+
+        // ========== DATE ==========
+        function setDefaultDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('debtDate').value = today;
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        // ========== DEBTS CRUD ==========
+        function addDebt(person, description, paymentMethod, date) {
+            const debt = {
+                person,
+                description,
+                paymentMethod: paymentMethod || 'Belirtilmedi',
+                date,
+                paid: false,
+                paidDate: null,
+                createdAt: Date.now(),
+                archived: false,
+                archivedAt: null
+            };
+
+            // Push to Firebase (auto-generates unique key)
+            debtsRef.push(debt)
+                .then(() => {
+                    showToast(`💕 ${person} için borç eklendi!`);
+                })
+                .catch((error) => {
+                    showToast(`❌ Hata: ${error.message}`);
+                });
+        }
+
+        function togglePaid(id) {
+            const debt = debts.find(d => d.id === id);
+            if (!debt) return;
+
+            if (!debt.paid) {
+                // Opening modal to confirm
+                pendingDebtId = id;
+                const info = document.getElementById('modalDebtInfo');
+                info.innerHTML = `
+                    <strong>${escapeHtml(debt.person)}</strong> - ${escapeHtml(debt.description)}
+                    <span class="modal-debt-detail">${escapeHtml(debt.paymentMethod)}</span>
+                `;
+                document.getElementById('paymentModal').classList.add('active');
+            } else {
+                // Unpaid - toggle back
+                debtsRef.child(id).update({
+                    paid: false,
+                    paidDate: null
+                }).then(() => {
+                    showToast('⏳ Borç tekrar ödenmemiş olarak işaretlendi.');
+                });
+            }
+        }
+
+        function confirmPayment() {
+            if (!pendingDebtId) return;
+            debtsRef.child(pendingDebtId).update({
+                paid: true,
+                paidDate: new Date().toISOString().split('T')[0]
+            }).then(() => {
+                closeModal('paymentModal');
+                showCelebration();
+                showToast('🎉 Harika! Borç ödendi!');
+            });
+            pendingDebtId = null;
+        }
+
+        function cancelPayment() {
+            pendingDebtId = null;
+            closeModal('paymentModal');
+        }
+
+        function requestDelete(id) {
+            const debt = debts.find(d => d.id === id);
+            if (!debt) return;
+            pendingDebtId = id;
+            const info = document.getElementById('deleteModalInfo');
+            info.innerHTML = `
+                <strong>${escapeHtml(debt.person)}</strong> - ${escapeHtml(debt.description)}
+                <span class="modal-debt-detail">${escapeHtml(debt.paymentMethod)}</span>
+            `;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function confirmDelete() {
+            if (!pendingDebtId) return;
+            debtsRef.child(pendingDebtId).update({
+                archived: true,
+                archivedAt: Date.now()
+            })
+                .then(() => {
+                    closeModal('deleteModal');
+                    showToast('🗂️ Borç arşive alındı!');
+                });
+            pendingDebtId = null;
+        }
+
+        function cancelDelete() {
+            pendingDebtId = null;
+            closeModal('deleteModal');
+        }
+
+        function requestClearAll() {
+            document.getElementById('clearAllModal').classList.add('active');
+        }
+
+        function confirmClearAll() {
+            const updates = {};
+            debts.forEach(debt => {
+                updates[`${debt.id}/archived`] = true;
+                updates[`${debt.id}/archivedAt`] = Date.now();
+            });
+
+            if (!Object.keys(updates).length) {
+                closeModal('clearAllModal');
+                return;
+            }
+
+            debtsRef.update(updates)
+                .then(() => {
+                    closeModal('clearAllModal');
+                    showToast('🧳 Tüm aktif borçlar arşive alındı!');
+                });
+        }
+
+        function cancelClearAll() {
+            closeModal('clearAllModal');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // ========== RENDER ==========
+        function renderAll() {
+            renderSummary();
+            renderFunMessage();
+            renderDebtList();
+        }
+
+        function renderSummary() {
+            const total = debts.length;
+            const paid = debts.filter(d => d.paid).length;
+            const remaining = total - paid;
+
+            document.getElementById('totalAmount').textContent = total;
+            document.getElementById('paidAmount').textContent = paid;
+            document.getElementById('remainingAmount').textContent = remaining;
+        }
+
+        function renderFunMessage() {
+            const el = document.getElementById('funMessage');
+            const total = debts.length;
+            const unpaid = debts.filter(d => !d.paid).length;
+
+            const messages = {
+                empty: [
+                    'Henüz borç yok. Bugün ne ısmarlıyorsun? 🤔',
+                    'Hesap defteri bomboş! Masum musunuz yoksa? 😇',
+                    'Hiç borç yok! Bu gidişle aranız çok iyi demek 💕'
+                ],
+                allPaid: [
+                    'Tüm borçlar ödendi! Aferin size! 🎉💕',
+                    'Temiz hesap, uzun dostluk! Süpersiniz! ✨',
+                    'Borç bitti, aşk kaldı! 🥰'
+                ],
+                manyUnpaid: [
+                    'Eyvah! Bayağı borç birikmiş! 😱',
+                    'Bu borçlar ödenmezse kalp kırar! 💔😤',
+                    'Borçlar çığ gibi büyüyor! Dikkat! ⚡'
+                ],
+                someUnpaid: [
+                    'Birkaç borç kalmış, hallederiz! 😉',
+                    'Neredeyse temiz sayfa! Biraz daha 💪',
+                    'Borçlar azalıyor, devam edin! 🚀'
+                ],
+                onlyOne: [
+                    'Tek bir borç var, kolay iş! 😎',
+                    'Sadece bir tane kalmış, hadi bitir! 💪',
+                    'Son borç! Öde de kurtul! 😄'
+                ]
+            };
+
+            let category;
+            if (total === 0) category = 'empty';
+            else if (unpaid === 0) category = 'allPaid';
+            else if (unpaid === 1) category = 'onlyOne';
+            else if (unpaid >= 5) category = 'manyUnpaid';
+            else category = 'someUnpaid';
+
+            const options = messages[category];
+            el.textContent = options[Math.floor(Math.random() * options.length)];
+        }
+
+        function renderDebtList() {
+            const list = document.getElementById('debtList');
+            const btnClearAll = document.getElementById('btnClearAll');
+
+            if (debts.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="emoji">🥰</div>
+                        <p>Hiç borç yok!</p>
+                        <p class="sub">Henüz bir borç eklenmemiş. Yukarıdan ekleyebilirsin! 💕</p>
+                    </div>
+                `;
+                btnClearAll.style.display = 'none';
+                return;
+            }
+
+            btnClearAll.style.display = '';
+
+            list.innerHTML = debts.map(debt => `
+                <div class="debt-card ${debt.paid ? 'paid' : ''}" data-id="${debt.id}">
+                    <label class="debt-checkbox">
+                        <input type="checkbox" ${debt.paid ? 'checked' : ''} data-debt-id="${debt.id}">
+                        <span class="checkmark"></span>
+                    </label>
+                    <div class="debt-info">
+                        <div class="debt-top-row">
+                            <span class="debt-person">${escapeHtml(debt.person)}</span>
+                        </div>
+                        <div class="debt-description">${escapeHtml(debt.description)}</div>
+                        <div class="debt-payment-highlight">
+                            <span class="debt-payment-label">Ödeme Şekli</span>
+                            <span class="debt-payment-value">💳 ${escapeHtml(debt.paymentMethod)}</span>
+                        </div>
+                        <div class="debt-meta">
+                            <span>📅 ${formatDate(debt.date)}</span>
+                        </div>
+                        ${debt.paid ? `<div class="debt-paid-label">✅ Ödendi${debt.paidDate ? ' · ' + formatDate(debt.paidDate) : ''}</div>` : ''}
+                    </div>
+                    <button class="btn-delete" data-delete-id="${debt.id}" title="Arşive al">🗂️</button>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function normalizeDebtRecord(record) {
+            return {
+                person: typeof record?.person === 'string' ? record.person : 'Belirtilmedi',
+                description: typeof record?.description === 'string' ? record.description : '',
+                paymentMethod: typeof record?.paymentMethod === 'string' && record.paymentMethod.trim() ? record.paymentMethod : 'Belirtilmedi',
+                date: typeof record?.date === 'string' ? record.date : new Date().toISOString().split('T')[0],
+                paid: Boolean(record?.paid),
+                paidDate: typeof record?.paidDate === 'string' ? record.paidDate : null,
+                createdAt: Number.isFinite(record?.createdAt) ? record.createdAt : Date.now(),
+                archived: Boolean(record?.archived),
+                archivedAt: Number.isFinite(record?.archivedAt) ? record.archivedAt : null
+            };
+        }
+
+        function createBackupPayload() {
+            const debtMap = {};
+            allDebts.forEach(({ id, ...debt }) => {
+                debtMap[id] = debt;
+            });
+
+            return {
+                version: 2,
+                exportedAt: new Date().toISOString(),
+                totalCount: allDebts.length,
+                activeCount: debts.length,
+                archivedCount: allDebts.length - debts.length,
+                debts: debtMap
+            };
+        }
+
+        function persistLocalBackup() {
+            try {
+                localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(createBackupPayload()));
+            } catch (error) {
+                console.warn('Local backup could not be written:', error);
+            }
+        }
+
+        function getLocalBackup() {
+            try {
+                const raw = localStorage.getItem(LOCAL_BACKUP_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (error) {
+                console.warn('Local backup could not be read:', error);
+                return null;
+            }
+        }
+
+        function renderBackupStatus() {
+            const status = document.getElementById('backupStatus');
+            const archivedCount = allDebts.length - debts.length;
+            const localBackup = getLocalBackup();
+
+            if (allDebts.length === 0 && localBackup?.totalCount) {
+                status.textContent = `Bu cihazda ${localBackup.totalCount} kayıtlık bir otomatik kopya saklanıyor.`;
+                return;
+            }
+
+            if (archivedCount > 0) {
+                status.textContent = `${archivedCount} kayıt arşivde saklanıyor ve son görünüm bu cihazda otomatik korunuyor.`;
+                return;
+            }
+
+            status.textContent = 'Silinen kayıtlar arşivde kalır; son görünüm bu cihazda otomatik korunur.';
+        }
+
+        function downloadBackup() {
+            const payload = createBackupPayload();
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const dateStamp = new Date().toISOString().slice(0, 10);
+
+            link.href = url;
+            link.download = `selma-yedek-${dateStamp}.json`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+            showToast('📥 Yedek indirildi!');
+        }
+
+        function triggerRestorePicker() {
+            document.getElementById('backupFileInput').click();
+        }
+
+        function isImportableDebt(record) {
+            return Boolean(record)
+                && typeof record === 'object'
+                && typeof record.person === 'string'
+                && typeof record.description === 'string'
+                && typeof record.date === 'string';
+        }
+
+        function restoreBackupFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const payload = JSON.parse(reader.result);
+                    const sourceDebts = payload?.debts;
+
+                    if (!sourceDebts || typeof sourceDebts !== 'object') {
+                        throw new Error('Yedek formatı tanınmadı.');
+                    }
+
+                    const updates = {};
+                    let importedCount = 0;
+
+                    Object.entries(sourceDebts).forEach(([id, value]) => {
+                        if (!isImportableDebt(value)) return;
+                        updates[id] = normalizeDebtRecord(value);
+                        importedCount += 1;
+                    });
+
+                    if (!importedCount) {
+                        throw new Error('Geçerli kayıt bulunamadı.');
+                    }
+
+                    debtsRef.update(updates)
+                        .then(() => {
+                            showToast(`♻️ ${importedCount} kayıt geri yüklendi!`);
+                        })
+                        .catch((error) => {
+                            showToast(`❌ Hata: ${error.message}`);
+                        });
+                } catch (error) {
+                    showToast(`❌ Hata: ${error.message}`);
+                } finally {
+                    event.target.value = '';
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+        // ========== UI EFFECTS ==========
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function showCelebration() {
+            const container = document.getElementById('celebration');
+            const emojis = ['💕', '🎉', '✨', '🥳', '❤️', '💖', '🌟', '🎊', '💝', '🦋'];
+
+            for (let i = 0; i < 20; i++) {
+                const confetti = document.createElement('span');
+                confetti.className = 'confetti';
+                confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.animationDelay = Math.random() * 0.8 + 's';
+                confetti.style.animationDuration = (1 + Math.random() * 1) + 's';
+                container.appendChild(confetti);
+            }
+
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 3000);
+        }
+
+        function createFloatingHearts() {
+            const container = document.getElementById('floatingHearts');
+            const hearts = ['💕', '💖', '💗', '💝', '🦋', '✨', '🌸'];
+
+            for (let i = 0; i < 12; i++) {
+                const heart = document.createElement('span');
+                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDuration = (8 + Math.random() * 12) + 's';
+                heart.style.animationDelay = Math.random() * 10 + 's';
+                heart.style.fontSize = (16 + Math.random() * 20) + 'px';
+                container.appendChild(heart);
+            }
+        }
+
+        // ========== EVENT LISTENERS ==========
+        function setupEventListeners() {
+            // Form submit
+            document.getElementById('debtForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const person = document.getElementById('debtPerson').value;
+                const description = document.getElementById('debtDescription').value;
+                const paymentMethod = document.getElementById('debtPaymentMethod').value;
+                const date = document.getElementById('debtDate').value;
+
+                if (!person || !description || !date) return;
+
+                addDebt(person, description, paymentMethod, date);
+                this.reset();
+                setDefaultDate();
+            });
+
+            // Event delegation for dynamically created debt cards
+            document.getElementById('debtList').addEventListener('click', function(e) {
+                // Handle checkbox click
+                const checkbox = e.target.closest('input[data-debt-id]');
+                if (checkbox) {
+                    e.preventDefault();
+                    const debtId = checkbox.getAttribute('data-debt-id');
+                    togglePaid(debtId);
+                    return;
+                }
+
+                // Handle checkmark span click (visual part of checkbox)
+                const checkmark = e.target.closest('.debt-checkbox');
+                if (checkmark && !e.target.matches('input')) {
+                    e.preventDefault();
+                    const input = checkmark.querySelector('input[data-debt-id]');
+                    if (input) {
+                        const debtId = input.getAttribute('data-debt-id');
+                        togglePaid(debtId);
+                    }
+                    return;
+                }
+
+                // Handle delete button click
+                const deleteBtn = e.target.closest('[data-delete-id]');
+                if (deleteBtn) {
+                    e.preventDefault();
+                    const debtId = deleteBtn.getAttribute('data-delete-id');
+                    requestDelete(debtId);
+                    return;
+                }
+            });
+
+            // Payment modal
+            document.getElementById('btnConfirmPay').addEventListener('click', confirmPayment);
+            document.getElementById('btnCancelPay').addEventListener('click', cancelPayment);
+
+            // Delete modal
+            document.getElementById('btnConfirmDelete').addEventListener('click', confirmDelete);
+            document.getElementById('btnCancelDelete').addEventListener('click', cancelDelete);
+
+            // Clear all
+            document.getElementById('btnClearAll').addEventListener('click', requestClearAll);
+            document.getElementById('btnConfirmClear').addEventListener('click', confirmClearAll);
+            document.getElementById('btnCancelClear').addEventListener('click', cancelClearAll);
+
+            // Backups
+            const downloadBackupButton = document.getElementById('btnDownloadBackup');
+            const restoreBackupButton = document.getElementById('btnRestoreBackup');
+            const backupFileInput = document.getElementById('backupFileInput');
+
+            if (downloadBackupButton) {
+                downloadBackupButton.addEventListener('click', downloadBackup);
+            }
+
+            if (restoreBackupButton) {
+                restoreBackupButton.addEventListener('click', triggerRestorePicker);
+            }
+
+            if (backupFileInput) {
+                backupFileInput.addEventListener('change', restoreBackupFromFile);
+            }
+
+            // Close modals on overlay click
+            ['paymentModal', 'deleteModal', 'clearAllModal'].forEach(id => {
+                document.getElementById(id).addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModal(id);
+                        pendingDebtId = null;
+                    }
+                });
+            });
+
+            // Escape key closes modals
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    ['paymentModal', 'deleteModal', 'clearAllModal'].forEach(closeModal);
+                    pendingDebtId = null;
+                }
+            });
+        }
+
+        // ========== START ==========
+        init();
+    </script>
+</body>
+</html>
