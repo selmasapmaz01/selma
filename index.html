@@ -682,25 +682,28 @@
 
         /* Delete Button */
         .btn-delete {
-            width: 34px;
-            height: 34px;
+            min-width: 58px;
+            height: 38px;
+            padding: 0 12px;
             border-radius: 10px;
             border: none;
             background: rgba(255, 107, 129, 0.1);
             color: #e84393;
-            font-size: 1rem;
+            font-size: 0.82rem;
+            font-weight: 800;
             cursor: pointer;
             transition: all 0.3s ease;
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
             -webkit-tap-highlight-color: transparent;
         }
 
         .btn-delete:hover {
             background: rgba(255, 107, 129, 0.3);
-            transform: scale(1.1);
+            transform: translateY(-1px);
         }
 
         /* ========== MODAL ========== */
@@ -1040,10 +1043,10 @@
             <div class="actions-top">
                 <div class="actions-copy">
                     <strong>Kayıt koruması açık</strong>
-                    <span>Silinen kayıtları arşivde tutup son görünümü bu cihazda otomatik koruyoruz.</span>
+                    <span>Silinen kayıtları veritabanından kaldırmadan önce bu cihazda otomatik kopya tutuyoruz.</span>
                 </div>
             </div>
-            <p class="backup-note" id="backupStatus">Silinen kayıtlar kalıcı olarak arşivde tutulacak.</p>
+            <p class="backup-note" id="backupStatus">Son görünüm bu cihazda otomatik korunur.</p>
         </section>
 
         <!-- Add Debt Form -->
@@ -1080,7 +1083,7 @@
         <section class="debt-list-section">
             <div class="debt-list-header">
                 <h2>📒 Borç Listesi</h2>
-                <button class="btn-clear-all" id="btnClearAll" style="display: none;">🧳 Tümünü Arşivle</button>
+                <button class="btn-clear-all" id="btnClearAll" style="display: none;">🗑️ Tümünü Sil</button>
             </div>
             <div class="debt-list" id="debtList">
                 <div class="loading-spinner" id="loadingSpinner"></div>
@@ -1109,11 +1112,11 @@
     <!-- Delete Confirmation Modal -->
     <div class="modal-overlay" id="deleteModal">
         <div class="modal">
-            <div class="modal-emoji">🗂️</div>
-            <h3>Bu borcu arşive almak istediğine emin misin?</h3>
+            <div class="modal-emoji">🗑️</div>
+            <h3>Bu borcu silmek istediğine emin misin?</h3>
             <p id="deleteModalInfo">Borç detayları burada görünecek.</p>
             <div class="modal-buttons">
-                <button class="btn-confirm" id="btnConfirmDelete" style="background: linear-gradient(135deg, #e84393, #fd79a8);">Evet, arşive al! 🗂️</button>
+                <button class="btn-confirm" id="btnConfirmDelete" style="background: linear-gradient(135deg, #e84393, #fd79a8);">Evet, sil! 🗑️</button>
                 <button class="btn-cancel" id="btnCancelDelete">Vazgeç 🙅</button>
             </div>
         </div>
@@ -1122,11 +1125,11 @@
     <!-- Clear All Confirmation Modal -->
     <div class="modal-overlay" id="clearAllModal">
         <div class="modal">
-            <div class="modal-emoji">🧳</div>
-            <h3>Tüm aktif borçları arşive almak istediğine emin misin?</h3>
-            <p>Liste temizlenir ama kayıtlar arşivde saklanmaya devam eder.</p>
+            <div class="modal-emoji">🗑️</div>
+            <h3>Tüm borçları silmek istediğine emin misin?</h3>
+            <p>Bu işlem veritabanındaki tüm borç kayıtlarını kaldırır.</p>
             <div class="modal-buttons">
-                <button class="btn-confirm" id="btnConfirmClear" style="background: linear-gradient(135deg, #e84393, #fd79a8);">Evet, arşivle! 🧳</button>
+                <button class="btn-confirm" id="btnConfirmClear" style="background: linear-gradient(135deg, #e84393, #fd79a8);">Evet, hepsini sil! 🗑️</button>
                 <button class="btn-cancel" id="btnCancelClear">Vazgeç 🙅</button>
             </div>
         </div>
@@ -1205,7 +1208,7 @@
                     });
                     allDebts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                 }
-                debts = allDebts.filter(debt => !debt.archived);
+                debts = allDebts;
                 persistLocalBackup();
                 renderAll();
                 renderBackupStatus();
@@ -1233,9 +1236,7 @@
                 date,
                 paid: false,
                 paidDate: null,
-                createdAt: Date.now(),
-                archived: false,
-                archivedAt: null
+                createdAt: Date.now()
             };
 
             // Push to Firebase (auto-generates unique key)
@@ -1304,13 +1305,10 @@
 
         function confirmDelete() {
             if (!pendingDebtId) return;
-            debtsRef.child(pendingDebtId).update({
-                archived: true,
-                archivedAt: Date.now()
-            })
+            debtsRef.child(pendingDebtId).remove()
                 .then(() => {
                     closeModal('deleteModal');
-                    showToast('🗂️ Borç arşive alındı!');
+                    showToast('🗑️ Borç silindi!');
                 });
             pendingDebtId = null;
         }
@@ -1325,21 +1323,15 @@
         }
 
         function confirmClearAll() {
-            const updates = {};
-            debts.forEach(debt => {
-                updates[`${debt.id}/archived`] = true;
-                updates[`${debt.id}/archivedAt`] = Date.now();
-            });
-
-            if (!Object.keys(updates).length) {
+            if (!debts.length) {
                 closeModal('clearAllModal');
                 return;
             }
 
-            debtsRef.update(updates)
+            debtsRef.remove()
                 .then(() => {
                     closeModal('clearAllModal');
-                    showToast('🧳 Tüm aktif borçlar arşive alındı!');
+                    showToast('🗑️ Tüm borçlar silindi!');
                 });
         }
 
@@ -1450,7 +1442,7 @@
                         </div>
                         ${debt.paid ? `<div class="debt-paid-label">✅ Ödendi${debt.paidDate ? ' · ' + formatDate(debt.paidDate) : ''}</div>` : ''}
                     </div>
-                    <button class="btn-delete" data-delete-id="${debt.id}" title="Arşive al">🗂️</button>
+                    <button class="btn-delete" data-delete-id="${debt.id}" title="Sil">🗑️ <span>Sil</span></button>
                 </div>
             `).join('');
         }
@@ -1470,9 +1462,7 @@
                 date: typeof record?.date === 'string' ? record.date : new Date().toISOString().split('T')[0],
                 paid: Boolean(record?.paid),
                 paidDate: typeof record?.paidDate === 'string' ? record.paidDate : null,
-                createdAt: Number.isFinite(record?.createdAt) ? record.createdAt : Date.now(),
-                archived: Boolean(record?.archived),
-                archivedAt: Number.isFinite(record?.archivedAt) ? record.archivedAt : null
+                createdAt: Number.isFinite(record?.createdAt) ? record.createdAt : Date.now()
             };
         }
 
@@ -1487,7 +1477,7 @@
                 exportedAt: new Date().toISOString(),
                 totalCount: allDebts.length,
                 activeCount: debts.length,
-                archivedCount: allDebts.length - debts.length,
+                archivedCount: 0,
                 debts: debtMap
             };
         }
@@ -1512,7 +1502,6 @@
 
         function renderBackupStatus() {
             const status = document.getElementById('backupStatus');
-            const archivedCount = allDebts.length - debts.length;
             const localBackup = getLocalBackup();
 
             if (allDebts.length === 0 && localBackup?.totalCount) {
@@ -1520,12 +1509,12 @@
                 return;
             }
 
-            if (archivedCount > 0) {
-                status.textContent = `${archivedCount} kayıt arşivde saklanıyor ve son görünüm bu cihazda otomatik korunuyor.`;
+            if (debts.length > 0) {
+                status.textContent = `${debts.length} aktif kayıt var. Son görünüm bu cihazda otomatik korunuyor.`;
                 return;
             }
 
-            status.textContent = 'Silinen kayıtlar arşivde kalır; son görünüm bu cihazda otomatik korunur.';
+            status.textContent = 'Silinen kayıtlar veritabanından kaldırılır; son görünüm bu cihazda otomatik korunur.';
         }
 
         function downloadBackup() {
